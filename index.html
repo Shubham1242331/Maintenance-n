@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Uploader</title>
+</head>
+<body>
+    <h1>Image Uploader</h1>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="uploadImage()">Upload Image</button>
+    <p id="status"></p>
+    <img id="uploadedImage" style="display: none; max-width: 100%;" alt="Uploaded Image">
+    
+    <script>
+        function uploadImage() {
+            const input = document.getElementById('imageInput');
+            const status = document.getElementById('status');
+            const uploadedImage = document.getElementById('uploadedImage');
+
+            const file = input.files[0];
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                fetch('https://api.github.com/repos/USERNAME/REPOSITORY/contents/images/' + file.name, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer YOUR_GITHUB_TOKEN',
+                    },
+                    body: JSON.stringify({
+                        message: 'Upload ' + file.name,
+                        content: btoa(file),
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    status.innerText = 'Image uploaded successfully!';
+                    uploadedImage.src = 'https://raw.githubusercontent.com/USERNAME/REPOSITORY/main/images/' + file.name;
+                    uploadedImage.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error uploading image:', error);
+                    status.innerText = 'Error uploading image';
+                });
+            } else {
+                status.innerText = 'Please select an image';
+            }
+        }
+    </script>
+</body>
+</html>
